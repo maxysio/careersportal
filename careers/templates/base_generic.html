@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% block title %}<title>ABC Inc. Careers</title>{% endblock %}
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        {% load static %}
+        <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+    </head>
+    <body>
+        <h1 class="banner_style">
+            Careers at ABC Inc.
+        </h1>
+        <div>
+            {% block content %}{% endblock %}
+        </div>
+    </body>
+</html>

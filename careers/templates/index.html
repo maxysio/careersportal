@@ -1,0 +1,10 @@
+{% extends "base_generic.html" %}
+{% block content %}
+
+{% if jobs_num > 0 %}
+    <p>{{ jobs_num }} jobs are available at this time</p>
+{% else %}
+    <p>No Jobs available at the moment</p>
+{% endif %}
+
+{% endblock %}
