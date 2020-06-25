@@ -9,3 +9,12 @@
     color:#1b2977;
     font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
+
+.regular_text {
+    font-size: medium;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    text-align: left;
+    color:#000000;
+    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}

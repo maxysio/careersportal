@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.views import generic
 from .models import Job, Applicant
 
 # Create your views here.
@@ -12,3 +13,9 @@ def index(request):
     }
 
     return render(request, 'index.html', context=context)
+
+class JobListView(generic.ListView):
+    model = Job
+    context_object_name = 'job_list'
+    queryset = Job.objects.order_by('-pub_date')
+    template_name = 'careers/index.html'
