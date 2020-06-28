@@ -5,12 +5,19 @@
     <ul>
         {% for job in job_list %}
         <li>
-            <a href="">{{ job.title }}</a> ({{job.descr}})
+            <a href="{{ job.get_absolute_url }}" class="regular_text">{{ job.title }}</a>
+            <p class="regular_text">({{job.descr}})</p>
         </li>
         {% endfor %}
   </ul>
 {% else %}
     <p class="regular_text">No positions available at the moment. Please check again later</p>
 {% endif %}
+{% if user.is_authenticated %}
+  <p class="regular_text">
+      <a href="{% url 'create_job' %}">Create a New Job Posting</a>
+  </p>
+{% endif %}
+
 
 {% endblock %}

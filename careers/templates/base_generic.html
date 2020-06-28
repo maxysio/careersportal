@@ -12,7 +12,13 @@
         <h1 class="banner_style">
             <a href="{% url 'index' %}">Careers at ABC Inc.</a>
         </h1>
-        <p class="regular_text" style="text-align: right; vertical-align: text-bottom;">Login</p>            
+        <p class="regular_text" style="text-align: right; vertical-align: text-bottom;">
+            {% if user.is_authenticated %}
+                Hello {{ user.username }}
+                <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+            {% endif %}
         <div>
             {% block content %}{% endblock %}
         </div>

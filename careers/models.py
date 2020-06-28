@@ -19,13 +19,12 @@ class Job(models.Model):
         OPEN = 'OPEN'
         CLOSED = 'CLOSED'
     
-    title = models.CharField(max_length=50, verbose_name='Job Title')
-    descr = models.TextField(max_length=500, verbose_name='Job Description')
+    title = models.CharField(max_length=100, verbose_name='Job Title')
+    descr = models.TextField(max_length=5000, verbose_name='Job Description')
     pub_date = models.DateTimeField(verbose_name='Date Published', auto_now_add=True)
     status = models.CharField(max_length=10, choices=JobStatus.choices, default=JobStatus.OPEN)
     created_by = models.ForeignKey(User, verbose_name='Created By', on_delete=models.CASCADE)
-    applicants = models.ForeignKey(Applicant, verbose_name='Applicants', null=True, on_delete=models.CASCADE)
-
+    
     def __str__(self):
         return self.title
 
@@ -33,4 +32,5 @@ class Job(models.Model):
         ordering = ['-pub_date']
 
     def get_absolute_url(self):
-        return reverse('job-detail', args=[str(self.id)])
+        #return reverse('job-detail', args=[str(self.id)])
+        return ""
