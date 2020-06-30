@@ -1,8 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views import generic
 from .models import Job, Applicant
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 
 # Create your views here.
@@ -22,6 +23,8 @@ class JobListView(generic.ListView):
     context_object_name = 'job_list'
     queryset = Job.objects.order_by('-pub_date')
     template_name = 'careers/index.html'
+    paginate_by = 5
+
 
 class CreateJobView(LoginRequiredMixin, generic.CreateView):
     login_url = "login"
@@ -35,4 +38,24 @@ class CreateJobView(LoginRequiredMixin, generic.CreateView):
         self.object.save()
         return HttpResponseRedirect(self.get_success_url())
 
+    def get_success_url(self):
+        return reverse('index')
     
+class JobDetailView(generic.DetailView):
+    model = Job
+    template_name = 'careers/job_detail.html'
+
+    def post(self, request, *args, **kwargs):
+        return HttpResponseRedirect(reverse('apply_job', args=[str(kwargs['pk'])]))
+
+class ApplyForJobView(generic.CreateView):
+    model = Applicant
+    template_name = 'careers/apply.html'
+    fields = ['first_name', 'last_name', 'dob', 'email', 'resume']
+
+    def form_valid(self, form):
+        form.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('index')

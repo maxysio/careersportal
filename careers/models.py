@@ -32,5 +32,5 @@ class Job(models.Model):
         ordering = ['-pub_date']
 
     def get_absolute_url(self):
-        #return reverse('job-detail', args=[str(self.id)])
-        return ""
+        return reverse('job_detail', args=[str(self.id)])
+

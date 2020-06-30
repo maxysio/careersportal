@@ -1,0 +1,15 @@
+{% extends "base_generic.html" %}
+{% block content %}
+
+<h1>Job Title: {{ job.title }}</h1>
+<p><strong>Job Description:</strong></p>
+<p>{{ job.descr }}</p>
+<p>
+    <form method="post">{% csrf_token %}
+        <input type="submit" value="Apply">
+    </form>
+    
+    <input type=button value="Back" onClick="javascript:history.go(-1);">
+</p>
+
+{% endblock %}
