@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
-from .models import Job, Applicant
+from .models import Job, Applicant, Application
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -54,7 +54,16 @@ class ApplyForJobView(generic.CreateView):
     fields = ['first_name', 'last_name', 'dob', 'email', 'resume']
 
     def form_valid(self, form):
-        form.save()
+        # Save the Applicant
+        applicant = form.save()
+
+        # Get the job
+        job = get_object_or_404(Job, pk=self.kwargs['pk'])
+
+        # Save the Application
+        Application.objects.create(job=job, applicant=applicant)
+
+        # Redirect
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):

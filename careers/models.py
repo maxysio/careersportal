@@ -34,3 +34,9 @@ class Job(models.Model):
     def get_absolute_url(self):
         return reverse('job_detail', args=[str(self.id)])
 
+class Application(models.Model):
+    job = models.ForeignKey(Job, verbose_name='Job Applied For', on_delete=models.CASCADE)
+    applicant = models.ForeignKey(Applicant, verbose_name='Applicant', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.job + ' ' + self.applicant

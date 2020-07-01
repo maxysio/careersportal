@@ -2,14 +2,32 @@
 {% block content %}
 
 {% if job_list %}
-    <ul>
+    <table class="table_style">
+        <tr class="table_row_style">
+            <th class="table_header_style">Job Title</th>
+            <th class="table_header_style">Job Description</th>
+            {% if user.is_authenticated %}
+                {% if app_list %}
+                    <th class="table_header_style">Applicants</th>
+                {% endif %}
+            {% endif %} 
+        </tr>
         {% for job in job_list %}
-        <li>
-            <a href="{{ job.get_absolute_url }}">{{ job.title }}</a>
-            <p>{{ job.descr|truncatewords:50 }}</p>
-        </li>
+        <tr class="table_row_style">
+            <td>
+                <a href="{{ job.get_absolute_url }}">{{ job.title }}</a>
+            </td>
+            <td>
+                {{ job.descr|truncatewords:50 }} 
+            </td>
+            {% if user.is_authenticated %}
+                {% if app_list %}
+
+                {% endif %}
+            {% endif %}            
+        </tr>
         {% endfor %}
-  </ul>
+    </table>
 {% else %}
     <p>No positions available at the moment. Please check again later</p>
 {% endif %}
