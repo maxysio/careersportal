@@ -18,6 +18,9 @@ def index(request):
 
     return render(request, 'index.html', context=context)
 
+def analyze_view(request, pk):
+    return render(request, 'careers/analyzejob.html')
+
 class JobListView(generic.ListView):
     model = Job
     context_object_name = 'job_list'
@@ -46,7 +49,10 @@ class JobDetailView(generic.DetailView):
     template_name = 'careers/job_detail.html'
 
     def post(self, request, *args, **kwargs):
-        return HttpResponseRedirect(reverse('apply_job', args=[str(kwargs['pk'])]))
+        if request.POST.get("Apply"):
+            return HttpResponseRedirect(reverse('apply_job', args=[str(kwargs['pk'])]))
+        elif request.POST.get("Analyze"):
+            return HttpResponseRedirect(reverse('analyze_job', args=[str(kwargs['pk'])])) 
 
 class ApplyForJobView(generic.CreateView):
     model = Applicant
