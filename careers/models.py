@@ -40,3 +40,11 @@ class Application(models.Model):
 
     def __str__(self):
         return self.job + ' ' + self.applicant
+
+class JobAnalysis(models.Model):
+    job = models.ForeignKey(Job, verbose_name='Job', on_delete=models.CASCADE)
+    keyword = models.CharField(max_length=500, verbose_name='Keyword')
+    relevance = models.DecimalField(verbose_name='Relevance', max_digits=19, decimal_places=6)
+
+    def __str__(self):
+        return self.keyword

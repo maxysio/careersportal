@@ -9,6 +9,7 @@
         <form method="post">
             {% csrf_token %}
             <input type="submit" name="Analyze" value="Analyze">
+            <input type=button value="Back" onClick="javascript:history.go(-1);">
         </form>
     </p>
 {% else %}

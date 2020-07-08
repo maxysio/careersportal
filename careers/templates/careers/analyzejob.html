@@ -1,4 +1,24 @@
 {% extends "base_generic.html" %}
 {% block content %}
-<h1>Analyze this</h1>
+<h1>Analysis</h1>
+<p>
+    {% if 'Error' in ja %}
+        Error: {{ ja|get_item:'Error' }}
+    {% else %}
+        <table class="table_style">
+            <tr class="table_row_style"></tr>
+            <th class="table_header_style">Keyword</th>
+            <th class="table_header_style">Relevance</th>
+            {% for k in ja %}
+                <tr>
+                    <td>{{ k.keyword }}</td>
+                    <td>{{ k.relevance }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+</p>
+<form method="post">{% csrf_token %}
+    <input type=button value="Back" onClick="javascript:history.go(-1);">
+</form>
 {% endblock %}
