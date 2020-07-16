@@ -13,6 +13,18 @@ class Applicant(models.Model):
     def __str__(self):
         return self.first_name + ' ' + self.last_name
 
+    def get_absolute_url(self):
+        return reverse('applicant_detail', args=[str(self.id)])
+
+    def resume_link(self):
+        if self.resume:
+            return self.resume.url
+        else:
+            return "No attachment"
+    
+    resume_link.allow_tags = True
+
+    
 class Job(models.Model):
     
     class JobStatus(models.TextChoices):

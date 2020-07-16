@@ -37,6 +37,9 @@ def analyze_view(request, pk):
 
     return render(request, 'careers/analyzejob.html', context=context)
 
+def analyze_applicants(request, pk):
+    return render(request, 'careers/analyzeapplicants.html')
+
 class JobListView(generic.ListView):
     model = Job
     context_object_name = 'job_list'
@@ -69,13 +72,19 @@ class CreateJobView(LoginRequiredMixin, generic.CreateView):
 class JobDetailView(generic.DetailView):
     model = Job
     template_name = 'careers/job_detail.html'
-
+    
     def post(self, request, *args, **kwargs):
         if request.POST.get("Apply"):
             return HttpResponseRedirect(reverse('apply_job', args=[str(kwargs['pk'])]))
         elif request.POST.get("Analyze"):
-            return HttpResponseRedirect(reverse('analyze_job', args=[str(kwargs['pk'])])) 
+            return HttpResponseRedirect(reverse('analyze_job', args=[str(kwargs['pk'])]))
+        elif request.POST.get("Applicants"):
+            return HttpResponseRedirect(reverse('applicants_analysis', args=[str(kwargs['pk'])]))
 
+class ApplicantDetailView(generic.DetailView):
+    model = Applicant
+    template_name = 'careers/applicant_detail.html'
+    
 class ApplyForJobView(generic.CreateView):
     model = Applicant
     template_name = 'careers/apply.html'
@@ -134,6 +143,7 @@ def GetJobAnalysis(job_id, reanalyze=False):
         return job_keywords
 
 def AnalyzeText(text_to_analyze):
+    
     
     # Get the analysis
     dict_object = {}

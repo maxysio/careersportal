@@ -1,0 +1,25 @@
+{% extends "base_generic.html" %}
+{% block content %}
+
+<form method="post" enctype="multipart/form-data">{% csrf_token %}
+    
+    <h1>{{ applicant }}</h1>
+    <table class="table_style">
+        <tr class="table_row_style">
+            <td>Date of Birth</td>
+            <td>{{ applicant.dob }}</td>
+        </tr>
+        <tr class="table_row_style">
+            <td>Email</td>
+            <td>{{ applicant.email }}</td>
+        </tr>
+        <tr>
+            <td>Resume</td>
+            <td><a href="{{ applicant.resume_link }}">View</a></td>
+        </tr>
+    </table>
+    <input type=button value="Back" onClick="javascript:history.go(-1);">
+    
+</form>
+
+{% endblock %}

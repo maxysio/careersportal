@@ -23,7 +23,7 @@
                 {% if app_list %}
                     <td>
                         {% for appl in app_list|filter_appplicants:job %}
-                            {{ appl.applicant }}
+                            <li><a href="{{ appl.applicant.get_absolute_url }}">{{ appl.applicant }}</a></li>
                         {% endfor %}
                     </td>
                 {% endif %}

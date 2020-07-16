@@ -22,20 +22,21 @@
 .table_style {
     border: 1px solid rgb(37, 130, 184);
     border-collapse: collapse;
-    padding: 5px;
-    width:70%;
+    padding: 1px;
+    width:80%;
 }
 
 .table_row_style {
     border: 1px solid rgb(37, 130, 184);
     border-collapse: collapse;
-    padding: 5px; 
+    padding: 1px; 
 }
 
 .table_header_style {
     background-color: rgb(37, 130, 184); 
-    color: aliceblue;
+    color: rgb(252, 253, 253);
     border: 1px solid rgb(37, 130, 184);
     border-collapse: collapse;
     padding: 5px; 
+    vertical-align: text-top;
 }
