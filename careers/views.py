@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
-from .models import Job, Applicant, Application, JobAnalysis
+from .models import Job, Applicant, Application, JobAnalysis, ApplicantAnalysis
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -13,6 +13,9 @@ from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 from ibm_cloud_sdk_core import ApiException
 
 from django.template.defaulttags import register
+
+from pdfminer.high_level import extract_text
+import docx2txt
 
 
 # Create your views here.
@@ -81,9 +84,15 @@ class JobDetailView(generic.DetailView):
         elif request.POST.get("Applicants"):
             return HttpResponseRedirect(reverse('applicants_analysis', args=[str(kwargs['pk'])]))
 
-class ApplicantDetailView(generic.DetailView):
+class ApplicantDetailView(LoginRequiredMixin, generic.DetailView):
     model = Applicant
     template_name = 'careers/applicant_detail.html'
+    login_url = "login"
+    
+    def get_context_data(self, **kwargs):
+        context = super(ApplicantDetailView, self).get_context_data(**kwargs)
+        context['applicant_analysis'] = GetApplicantAnalysis(str(self.kwargs['pk']))
+        return context
     
 class ApplyForJobView(generic.CreateView):
     model = Applicant
@@ -106,6 +115,49 @@ class ApplyForJobView(generic.CreateView):
     def get_success_url(self):
         return reverse('index')
 
+def GetApplicantAnalysis(applicant_id, reanalyze=False):
+    # Get the applicant
+    applicant = get_object_or_404(Applicant, pk=applicant_id)
+
+    # Check if analsysis already exist
+    if(reanalyze==False and ApplicantAnalysis.objects.filter(applicant=applicant).count()>0):
+        # return the analysis
+        return ApplicantAnalysis.objects.filter(applicant=applicant)
+    else:
+        # Analyze the details and Save it
+
+        # Get the local filename of the resume
+        resume_file_path = applicant.resume
+        # Read the resume
+        text_to_analyze = resume_file_path
+        if str(resume_file_path).lower().endswith(".pdf"):
+            text_to_analyze = extract_text(resume_file_path)
+        elif str(resume_file_path).lower().endswith(".docx"):
+            text_to_analyze = docx2txt.process(resume_file_path)
+        else:
+            return "Invalid File Type"
+
+        dict_object = AnalyzeText(text_to_analyze)
+
+        if('Error' in dict_object):
+            return dict_object
+
+        try:
+            ApplicantAnalysis.objects.filter(applicant=applicant).delete()
+        except:
+            # Do nothing
+            pass
+
+        # Keywords
+        applicant_keywords = []
+        for k in dict_object['keywords']:
+            ky_word = k['text']
+            rel = round(Decimal(k['relevance']) * 100, 6)
+            applicant_keywords.append(ApplicantAnalysis.objects.create(applicant=applicant, keyword=ky_word, relevance=rel))
+
+        # Return the analysis
+        return applicant_keywords
+
 def GetJobAnalysis(job_id, reanalyze=False):
 
     # Get the job
@@ -127,23 +179,26 @@ def GetJobAnalysis(job_id, reanalyze=False):
             return dict_object
 
         try:
-            JobAnalysis.objects.filter(job_id=job.id).delete()
+            JobAnalysis.objects.filter(job=job).delete()
         except:
-            # Do nothin
+            # Do nothing
             pass
 
         # Keywords
         job_keywords = []
+        count = 0
         for k in dict_object['keywords']:
+            if count == 10:
+                break
             ky_word = k['text']
             rel = round(Decimal(k['relevance']) * 100, 6)
             job_keywords.append(JobAnalysis.objects.create(job=job, keyword=ky_word, relevance=rel))
+            count += 1
 
         # Return the analysis
         return job_keywords
 
 def AnalyzeText(text_to_analyze):
-    
     
     # Get the analysis
     dict_object = {}
@@ -167,4 +222,3 @@ def get_item(dictionary, key):
 @register.filter
 def filter_appplicants(applications, job):
     return applications.filter(job=job)
-    

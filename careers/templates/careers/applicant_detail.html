@@ -18,6 +18,22 @@
             <td><a href="{{ applicant.resume_link }}">View</a></td>
         </tr>
     </table>
+    
+    {% if applicant_analysis %}
+    <p class="text_header">Keywords from Resume</p>
+        <table class="table_style">
+            <tr class="table_row_style"></tr>
+            <th class="table_header_style">Keyword</th>
+            <th class="table_header_style">Relevance (%)</th>
+            {% for k in applicant_analysis %}
+                <tr>
+                    <td>{{ k.keyword }}</td>
+                    <td>{{ k.relevance }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+    
     <input type=button value="Back" onClick="javascript:history.go(-1);">
     
 </form>
