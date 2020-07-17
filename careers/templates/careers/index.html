@@ -20,13 +20,13 @@
             {% if user.is_authenticated %}
                 <td>{{ job.status }}</td>
                 <td>{{ job.created_by }}</td>
+                <td>
                 {% if app_list %}
-                    <td>
-                        {% for appl in app_list|filter_appplicants:job %}
-                            <li><a href="{{ appl.applicant.get_absolute_url }}">{{ appl.applicant }}</a></li>
-                        {% endfor %}
-                    </td>
+                    {% for appl in app_list|filter_appplicants:job %}
+                        <li><a href="{{ appl.applicant.get_absolute_url }}">{{ appl.applicant }}</a></li>
+                    {% endfor %}
                 {% endif %}
+                </td>
                 <td>{{ job.pub_date }}</td>
             {% endif %}            
         </tr>

@@ -1,0 +1,23 @@
+{% extends "base_generic.html" %}
+{% block content %}
+
+<form method="post" enctype="multipart/form-data">{% csrf_token %}
+
+    <h3>Number of Applicants: {{ applicant_count }}</h3>
+    {% if applicants %}
+        <table class="small_table_style">
+            <tr class="table_row_style">
+                <th colspan="1" class="table_header_style">Applicant Name</th>
+                <th colspan="1" class="table_header_style">Score</th>
+            </tr>
+            {% for appl in applications %}
+                <tr class="table_row_style">
+                    <td>{{ appl.applicant }}</td>
+                    <td>{{ appl.score }}</td>
+                </tr>
+            {% endfor %}
+    {% endif %}
+    <input type=button value="Back" onClick="javascript:history.go(-1);"> 
+</form>
+ 
+{% endblock %}

@@ -17,6 +17,8 @@ from django.template.defaulttags import register
 from pdfminer.high_level import extract_text
 import docx2txt
 
+from fuzzywuzzy import process
+
 
 # Create your views here.
 def index(request):
@@ -32,7 +34,7 @@ def index(request):
 
 def analyze_view(request, pk):
     
-    ja = GetJobAnalysis(pk)
+    ja = GetJobAnalysis(pk, True)
 
     context = {
         'ja': ja
@@ -40,8 +42,20 @@ def analyze_view(request, pk):
 
     return render(request, 'careers/analyzejob.html', context=context)
 
-def analyze_applicants(request, pk):
-    return render(request, 'careers/analyzeapplicants.html')
+class ApplicationListView(generic.ListView):
+    model = Application
+    template_name = 'careers/applications.html'
+    context_object_name = 'applications'
+    paginate_by = 5
+
+    def get_context_data(self, **kwargs):
+        context = super(ApplicationListView, self).get_context_data(**kwargs)
+        job = get_object_or_404(Job, pk=self.kwargs['pk'])
+        
+        context['applicant_count'] = Application.objects.filter(job=job).count()
+        context['applicants'] = Application.objects.filter(job=job)
+
+        return context
 
 class JobListView(generic.ListView):
     model = Job
@@ -82,7 +96,7 @@ class JobDetailView(generic.DetailView):
         elif request.POST.get("Analyze"):
             return HttpResponseRedirect(reverse('analyze_job', args=[str(kwargs['pk'])]))
         elif request.POST.get("Applicants"):
-            return HttpResponseRedirect(reverse('applicants_analysis', args=[str(kwargs['pk'])]))
+            return HttpResponseRedirect(reverse('applicants', args=[str(kwargs['pk'])]))
 
 class ApplicantDetailView(LoginRequiredMixin, generic.DetailView):
     model = Applicant
@@ -106,14 +120,30 @@ class ApplyForJobView(generic.CreateView):
         # Get the job
         job = get_object_or_404(Job, pk=self.kwargs['pk'])
 
+        # Get Applicant Score
+        appl_score = GetApplicantScore(applicant, job)
+
         # Save the Application
-        Application.objects.create(job=job, applicant=applicant)
+        Application.objects.create(job=job, applicant=applicant, score=appl_score)
 
         # Redirect
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse('index')
+
+def GetApplicantScore(applicant, job):
+    applicant_keywords = GetKeywordList(GetApplicantAnalysis(applicant.id, False))
+    job_keywords = GetKeywordList(GetJobAnalysis(job.id, False))
+
+    score = 0
+    for jk in job_keywords:
+        # Check if the keyword has a match in the applicants keywords
+        # If yes, increase the score and move to the next
+        highest = process.extractOne(jk, applicant_keywords)
+        if(len(highest)>0 and highest[1]>80):
+            score += 1
+    return score
 
 def GetApplicantAnalysis(applicant_id, reanalyze=False):
     # Get the applicant
@@ -151,7 +181,7 @@ def GetApplicantAnalysis(applicant_id, reanalyze=False):
         # Keywords
         applicant_keywords = []
         for k in dict_object['keywords']:
-            ky_word = k['text']
+            ky_word = k['text'].lower()
             rel = round(Decimal(k['relevance']) * 100, 6)
             applicant_keywords.append(ApplicantAnalysis.objects.create(applicant=applicant, keyword=ky_word, relevance=rel))
 
@@ -190,7 +220,7 @@ def GetJobAnalysis(job_id, reanalyze=False):
         for k in dict_object['keywords']:
             if count == 10:
                 break
-            ky_word = k['text']
+            ky_word = k['text'].lower()
             rel = round(Decimal(k['relevance']) * 100, 6)
             job_keywords.append(JobAnalysis.objects.create(job=job, keyword=ky_word, relevance=rel))
             count += 1
@@ -199,6 +229,7 @@ def GetJobAnalysis(job_id, reanalyze=False):
         return job_keywords
 
 def AnalyzeText(text_to_analyze):
+    
     
     # Get the analysis
     dict_object = {}
@@ -214,6 +245,12 @@ def AnalyzeText(text_to_analyze):
     except ApiException as e:
         dict_object["Error"] = e.message
         return dict_object
+
+def GetKeywordList(arr_kw):
+    k_list = []
+    for k in arr_kw:
+        k_list.append(k.keyword)
+    return k_list
 
 @register.filter
 def get_item(dictionary, key):

@@ -4,7 +4,7 @@
 <form method="post" enctype="multipart/form-data">{% csrf_token %}
     
     <h1>{{ applicant }}</h1>
-    <table class="table_style">
+    <table class="small_table_style">
         <tr class="table_row_style">
             <td>Date of Birth</td>
             <td>{{ applicant.dob }}</td>
@@ -21,7 +21,7 @@
     
     {% if applicant_analysis %}
     <p class="text_header">Keywords from Resume</p>
-        <table class="table_style">
+        <table class="small_table_style">
             <tr class="table_row_style"></tr>
             <th class="table_header_style">Keyword</th>
             <th class="table_header_style">Relevance (%)</th>

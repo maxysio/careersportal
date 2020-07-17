@@ -35,6 +35,13 @@
     width:80%;
 }
 
+.small_table_style {
+    border: 1px solid rgb(37, 130, 184);
+    border-collapse: collapse;
+    padding: 1px;
+    width:30%;
+}
+
 .table_row_style {
     border: 1px solid rgb(37, 130, 184);
     border-collapse: collapse;
