@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
+
 from .models import Job, Applicant, Application, JobAnalysis, ApplicantAnalysis
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
@@ -34,7 +35,7 @@ def index(request):
 
 def analyze_view(request, pk):
     
-    ja = GetJobAnalysis(pk, True)
+    ja = GetJobAnalysis(pk, False)
 
     context = {
         'ja': ja
@@ -53,7 +54,14 @@ class ApplicationListView(generic.ListView):
         job = get_object_or_404(Job, pk=self.kwargs['pk'])
         
         context['applicant_count'] = Application.objects.filter(job=job).count()
-        context['applicants'] = Application.objects.filter(job=job)
+        applications = Application.objects.filter(job=job)
+        for ap in applications:
+            application_detail = GetApplicationDetail(applicant=ap.applicant, job=ap.job)
+            Application.objects.update(id=ap.id, job=ap.job, applicant=ap.applicant, 
+                score=int(application_detail['score']),
+                matched_keywords=application_detail['keywords'])
+
+        context['applicants'] = applications = Application.objects.filter(job=job)
 
         return context
 
@@ -121,10 +129,11 @@ class ApplyForJobView(generic.CreateView):
         job = get_object_or_404(Job, pk=self.kwargs['pk'])
 
         # Get Applicant Score
-        appl_score = GetApplicantScore(applicant, job)
+        appl_detail = GetApplicationDetail(applicant, job)
 
         # Save the Application
-        Application.objects.create(job=job, applicant=applicant, score=appl_score)
+        Application.objects.create(job=job, applicant=applicant, score=appl_detail['score'],
+            matched_keywords=appl_detail['keywords'])
 
         # Redirect
         return HttpResponseRedirect(self.get_success_url())
@@ -132,18 +141,30 @@ class ApplyForJobView(generic.CreateView):
     def get_success_url(self):
         return reverse('index')
 
-def GetApplicantScore(applicant, job):
+def GetApplicationDetail(applicant, job):
     applicant_keywords = GetKeywordList(GetApplicantAnalysis(applicant.id, False))
     job_keywords = GetKeywordList(GetJobAnalysis(job.id, False))
 
+    application_details = {
+    }
+
     score = 0
+    keywords = ''
     for jk in job_keywords:
         # Check if the keyword has a match in the applicants keywords
         # If yes, increase the score and move to the next
         highest = process.extractOne(jk, applicant_keywords)
-        if(len(highest)>0 and highest[1]>80):
+        if(len(highest)>0 and highest[1]>=80):
             score += 1
-    return score
+            keywords += jk + ', '
+    
+    if keywords.endswith(', '):
+        keywords = keywords[:-2]
+
+    application_details['score'] = score
+    application_details['keywords'] = keywords
+
+    return application_details
 
 def GetApplicantAnalysis(applicant_id, reanalyze=False):
     # Get the applicant
@@ -229,7 +250,11 @@ def GetJobAnalysis(job_id, reanalyze=False):
         return job_keywords
 
 def AnalyzeText(text_to_analyze):
+    # Authenticate with BM Watson
     
+    #authenticator = IAMAuthenticator('YOUR AUTHENTICATION STRING FROM IBM CLOUD')
+    service = NaturalLanguageUnderstandingV1(version='2019-07-12',authenticator=authenticator)
+    service.set_service_url('https://gateway.watsonplatform.net/natural-language-understanding/api')
     
     # Get the analysis
     dict_object = {}

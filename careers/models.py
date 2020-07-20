@@ -49,6 +49,7 @@ class Application(models.Model):
     job = models.ForeignKey(Job, verbose_name='Job Applied For', on_delete=models.CASCADE)
     applicant = models.ForeignKey(Applicant, verbose_name='Applicant', on_delete=models.CASCADE)
     score = models.IntegerField(verbose_name='Applicant Score', default=0)
+    matched_keywords = models.TextField(verbose_name='Matched Keywords', default='')
 
     def __str__(self):
         return self.job + ' ' + self.applicant
