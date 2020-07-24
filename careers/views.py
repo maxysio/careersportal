@@ -55,15 +55,21 @@ class ApplicationListView(generic.ListView):
         
         context['applicant_count'] = Application.objects.filter(job=job).count()
         applications = Application.objects.filter(job=job)
+        
         for ap in applications:
-            application_detail = GetApplicationDetail(applicant=ap.applicant, job=ap.job)
-            Application.objects.update(id=ap.id, job=ap.job, applicant=ap.applicant, 
-                score=int(application_detail['score']),
-                matched_keywords=application_detail['keywords'])
+            if(ap.score==0 or ap.matched_keywords==""):
+                application_detail = GetApplicationDetail(applicant=ap.applicant, job=ap.job)
+                ap.score=int(application_detail['score'])
+                ap.matched_keywords = application_detail['keywords']
+                ap.save()
 
-        context['applicants'] = applications = Application.objects.filter(job=job)
+        context['applicants'] = Application.objects.filter(job=job).order_by('-score')
 
         return context
+
+    def get_queryset(self):
+        job = get_object_or_404(Job, pk=self.kwargs['pk'])
+        return Application.objects.filter(job=job).order_by('-score')
 
 class JobListView(generic.ListView):
     model = Job
@@ -251,6 +257,7 @@ def GetJobAnalysis(job_id, reanalyze=False):
 
 def AnalyzeText(text_to_analyze):
     # Authenticate with BM Watson
+    
     
     #authenticator = IAMAuthenticator('YOUR AUTHENTICATION STRING FROM IBM CLOUD')
     service = NaturalLanguageUnderstandingV1(version='2019-07-12',authenticator=authenticator)
